@@ -17,6 +17,9 @@ from mavsdk.telemetry import FlightMode, Position, LandedState, Health # Import 
 import csv # For saving data to CSV
 import random
 import onnxruntime as ort # For ONNX model inference
+import tensorrt as trt
+import pycuda.driver as cuda
+import pycuda.autoinit
 
 # --- Configuration ---
 # MAVSDK connection string. For SITL on the same PC, use udpin://:14550
@@ -434,37 +437,22 @@ async def tracking_loop():
     initialize_mock_targets(image_width, image_height)
 
     # --- Real YOLO Model Loading ---
-    yolo_session = None # Use yolo_session for ONNX Runtime
-    onnx_input_height, onnx_input_width = 0, 0 # Initialize for scope
-    yolo_input_name = ""
-    yolo_output_names = []
+    yolo_engine = None
+    yolo_context = None
+    yolo_input_shape = None
 
-    _use_real_yolo_local = USE_REAL_YOLO 
-    
-    if _use_real_yolo_local:
+    if USE_REAL_YOLO:
         try:
-            # Configure ONNX Runtime to use TensorRT or CUDA execution providers
-            providers = ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider']
-            sess_options = ort.SessionOptions()
-            
-            yolo_session = ort.InferenceSession(REAL_YOLO_MODEL_PATH, sess_options, providers=providers)
-            
-            # Get input/output names and expected input size
-            yolo_input_name = yolo_session.get_inputs()[0].name
-            input_shape = yolo_session.get_inputs()[0].shape
-            # Assuming NCHW format (Batch, Channels, Height, Width)
-            onnx_input_height, onnx_input_width = input_shape[2], input_shape[3] 
-            yolo_output_names = [output.name for output in yolo_session.get_outputs()]
-            
-            print(f"TensorRT/ONNX model loaded from: {REAL_YOLO_MODEL_PATH}")
-            print(f"YOLO input name: {yolo_input_name}, input shape: {input_shape}, output names: {yolo_output_names}")
-
-        except ImportError:
-            print("Error: 'onnxruntime' not found. Please install it with 'pip install onnxruntime-gpu'. Falling back to mock YOLO.")
-            _use_real_yolo_local = False
+            TRT_LOGGER = trt.Logger(trt.Logger.INFO)
+            with open(REAL_YOLO_MODEL_PATH, "rb") as f, trt.Runtime(TRT_LOGGER) as runtime:
+                yolo_engine = runtime.deserialize_cuda_engine(f.read())
+            yolo_context = yolo_engine.create_execution_context()
+            yolo_input_shape = yolo_engine.get_binding_shape(0)
+            print(f"TensorRT engine loaded from: {REAL_YOLO_MODEL_PATH}")
+            print(f"YOLO input shape: {yolo_input_shape}")
         except Exception as e:
-            print(f"Error loading ONNX/TensorRT model: {e}. Falling back to mock YOLO.")
-            _use_real_yolo_local = False
+            print(f"Error loading TensorRT engine: {e}. Falling back to mock YOLO.")
+            USE_REAL_YOLO = False
     # --- End Real YOLO Model Loading ---
 
     # Initialize Kalman Filters for yaw (horizontal position) and pitch (vertical position)
@@ -567,56 +555,43 @@ async def tracking_loop():
 
             # --- Perform YOLO Inference (Real or Mock) ---
             detections = []
-            if _use_real_yolo_local and yolo_session: # Use the local flag here
+            if USE_REAL_YOLO and yolo_engine and yolo_context:
                 try:
                     # Preprocess frame for YOLO
-                    img = cv2.resize(frame, (onnx_input_width, onnx_input_height))
+                    img = cv2.resize(frame, (yolo_input_shape[2], yolo_input_shape[1]))
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                     img = img.astype(np.float32) / 255.0
                     img = np.transpose(img, (2, 0, 1))
                     img = np.expand_dims(img, axis=0) # Add batch dimension
 
-                    # Run inference
-                    outputs = yolo_session.run(yolo_output_names, {yolo_input_name: img})
-                    
-                    # --- POST-PROCESSING FOR YOLOv8/v11 ONNX OUTPUT ---
-                    # This is CRITICAL and model-specific. The raw 'outputs' tensor needs to be converted
-                    # into a list of bounding boxes, confidence scores, and class IDs.
-                    # Ultralytics YOLOv8 ONNX output typically has a shape like (1, num_detections, 6)
-                    # where 6 is [x_center, y_center, width, height, confidence, class_id] (or similar)
-                    # You will need to implement Non-Max Suppression (NMS) and confidence filtering.
-                    
-                    # Placeholder for actual post-processing logic
-                    # This is a highly simplified example; you'll need a full implementation.
-                    raw_output = outputs[0] # Assuming first output tensor contains detections
-                    
-                    # Example: Filter by confidence and convert to xyxy format
-                    # You will need to adapt this based on your exact model output structure
-                    for det in raw_output[0]: # Assuming batch size 1
-                        confidence = det[4] # Example: confidence is 5th element
-                        class_id = det[5] # Example: class ID is 6th element (for single class output)
-                        # For multi-class output, it might be np.argmax(det[5:])
-                        
-                        if confidence > 0.5: # Confidence threshold
-                            # Convert (x_center, y_center, width, height) to (x1, y1, x2, y2)
-                            # And scale coordinates back to original frame size
-                            
-                            x_center_norm, y_center_norm, w_norm, h_norm = det[0], det[1], det[2], det[3]
-                            
-                            # Scale coordinates from model input size to original frame size
-                            x1 = int((x_center_norm - w_norm/2) / onnx_input_width * image_width)
-                            y1 = int((y_center_norm - h_norm/2) / onnx_input_height * image_height)
-                            x2 = int((x_center_norm + w_norm/2) / onnx_input_width * image_width)
-                            y2 = int((y_center_norm + h_norm/2) / onnx_input_height * image_height)
+                    # Allocate buffers
+                    input_host = np.ascontiguousarray(img)
+                    input_device = cuda.mem_alloc(input_host.nbytes)
+                    cuda.memcpy_htod(input_device, input_host)
 
-                            detections.append({
-                                'xyxy': [x1, y1, x2, y2],
-                                'cls': int(class_id)
-                            })
-                    # You might also need to apply NMS here if your ONNX model doesn't include it.
+                    # Output buffer (assuming output shape is known, e.g., (1, num_detections, 6))
+                    output_shape = yolo_engine.get_binding_shape(1)
+                    output_host = np.empty(output_shape, dtype=np.float32)
+                    output_device = cuda.mem_alloc(output_host.nbytes)
 
+                    bindings = [int(input_device), int(output_device)]
+                    yolo_context.execute_v2(bindings)
+
+                    cuda.memcpy_dtoh(output_host, output_device)
+
+                    # Post-processing (adapt as needed for your model)
+                    for det in output_host[0]: # Assuming batch size 1
+                        confidence = det[4]
+                        class_id = int(det[5])
+                        if confidence > 0.5:
+                            x_center, y_center, w, h = det[0], det[1], det[2], det[3]
+                            x1 = int((x_center - w/2) / yolo_input_shape[2] * image_width)
+                            y1 = int((y_center - h/2) / yolo_input_shape[1] * image_height)
+                            x2 = int((x_center + w/2) / yolo_input_shape[2] * image_width)
+                            y2 = int((y_center + h/2) / yolo_input_shape[1] * image_height)
+                            detections.append({'xyxy': [x1, y1, x2, y2], 'cls': class_id})
                 except Exception as e:
-                    print(f"Error during real YOLO inference with ONNX Runtime: {e}. Using mock detections for this frame.")
+                    print(f"Error during TensorRT YOLO inference: {e}. Using mock detections for this frame.")
                     detections = mock_yolo_inference(frame)
             else:
                 detections = mock_yolo_inference(frame)
