@@ -58,9 +58,9 @@ Some components (trained models/dataset) will remain private until paper publica
 
 # Maintainers
 
-1. Kamran Ahmad
-2. Melvin Joseph
-3. Ayushya Ranjan
+1. Kamran Ahmad [@WOAH-KAMRAN]
+2. Melvin Joseph [@AVATAR3905]
+4. Ayushya Ranjan [@Dagger7164]
 
 # Mentor
-1. Dr. Sachin Gupta 
+1. Dr. Sachin Gupta [@Sachinmait]
