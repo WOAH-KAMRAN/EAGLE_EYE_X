@@ -51,6 +51,16 @@ Failsafe Lua script for emergency handling
 ESP32 Drone Bridge (under development) for telemetry communication
 
 
-#
+# License
 
+Released under the MIT License.
+Some components (trained models/dataset) will remain private until paper publication.
 
+# Maintainers
+
+1. Kamran Ahmad
+2. Melvin Joseph
+3. Ayushya Ranjan
+
+# Mentor
+1. Dr. Sachin Gupta 
