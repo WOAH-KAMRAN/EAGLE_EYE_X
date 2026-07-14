@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Models / weights
+*.pt
+*.onnx
+*.engine
+/models/
+
+# Data / logs
+*.zip
+*.csv
+/flights/
+/flights1/
+src/flights/
+src/flights1/
+/images/
+/results/
+/data/
+*.log
+*.tlog
+*.tlog.raw
+
+# Hardware / binary artifacts
+eeprom.bin
+mav.parm
+
+# Virtual environment (also excludes VENV package markdowns)
+/VENV/
+
+# OS / IDE
+.DS_Store
+.vscode/
+
+# Stray / junk files
+=1.71.0
+visdrone
+
+# PostScript junk accidentally created in src/
+src/asyncio
+src/csv
+src/cv2
+src/datetime
+src/np
+src/os
+src/time
+src/torch
+
+# ROS / Jetson build files
+build/
+devel/
+install/
+terrain/
+
+# Root experimental scripts (superseded by src/)
+/upg1.py
+/upg2.py
+/upg3.py
+/upg4.py
+/yaw2.py
+/modelrun.py
+/modelimg.py
+/mobilenet.py
+/mod1.py
+/idkupg.py
+/wl.py
+/WITHOUTLIDAR.py
