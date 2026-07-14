@@ -28,7 +28,7 @@ except ImportError as e:
 
 # --- Configuration ---
 # IMPORTANT: Update these for your hardware!
-CONNECTION_STRING = 'serial:///dev/ttyACM0:921600'  # Or ttyTHS1 for Jetson UART
+CONNECTION_STRING = 'udpin://127.0.0.1:14550'  # Or ttyTHS1 for Jetson UART
 YOLO_MODEL_PATH = 'yolov8n.pt'  # <--- UPDATE THIS!
 
 # Detection settings

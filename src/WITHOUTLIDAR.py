@@ -20,7 +20,7 @@ import random
 # --- Configuration ---
 # MAVSDK connection string. For SITL on the same PC, use udpin://:14550
 # This tells MAVSDK to listen for incoming UDP MAVLink connections on port 14550.
-CONNECTION_STRING = 'serial:///dev/ttyACM0:115200'
+CONNECTION_STRING = 'udpin://127.0.0.1:14550'
 
 # --- YOLO Model Configuration ---
 USE_REAL_YOLO = False          # Set to True to use your real YOLO model, False for mock detections
@@ -367,7 +367,7 @@ async def tracking_loop():
     # Pitch PID for vertical pixel alignment
     pitch_align_pid_controller = PID(KP_PITCH_ALIGN, KI_PITCH_ALIGN, KD_PITCH_ALIGN)
     
-    cap = cv2.VideoCapture(3) # For Ubuntu PC webcam: 0 is usually the default
+    cap = cv2.VideoCapture(2) # For Ubuntu PC webcam: 0 is usually the default
     if not cap.isOpened():
         print("Error: Could not open webcam.")
         # Attempt to stop offboard mode if it started

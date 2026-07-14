@@ -11,9 +11,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
 transform = midas_transforms.small_transform
 
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+cap = cv2.VideoCapture(2)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 960)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 
 # ---- Calibration ----
