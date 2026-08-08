@@ -30,13 +30,24 @@ Same as `lidar_trt.py`: torch, ultralytics, mavsdk, opencv-python, numpy, pyseri
 
 ```bash
 source VENV/uav/bin/activate
-python src/ASPS_LIDAR/ASPS_LIDAR_TR.py
+python src/ASPS_LIDAR/ASPS_LIDAR_TR.py            # uses configs/*.yaml defaults
+python src/ASPS_LIDAR/ASPS_LIDAR_TR.py --config experiments/ablation/configs/run.yaml   # experiment override
 ```
 
 ### Configuration
 
-- **`prioritization.py`** — ASPS weights (`ALPHA`–`DELTA`), `SWITCH_THRESHOLD`, `USE_ASPS` toggle
-- **`ASPS_LIDAR_TR.py`** top section — hardware config, PID gains, LiDAR params, target follow distance
+Constants are layered from YAML at startup (`src/ASPS_LIDAR/config.py`); any key you
+omit falls back to the built-in default. Precedence (later wins):
+
+1. built-in script defaults
+2. `configs/hardware.yaml`, `configs/control.yaml`, `configs/asps.yaml`, `configs/logging.yaml`
+3. `configs/local/*.yaml` (per-developer overrides, gitignored)
+4. an explicit file passed with `--config <path>`
+
+- **`configs/asps.yaml`** — ASPS weights (`ALPHA`–`DELTA`), `SWITCH_THRESHOLD`, `USE_ASPS` toggle, `CLASS_PRIORITIES`
+- **`configs/control.yaml`** — PID gains, Kalman Q/R, limits, follow distance
+- **`configs/hardware.yaml`** — camera index, LiDAR port, `CONNECTION_STRING`, model path
+- **`configs/logging.yaml`** — video recording, flight-data folder, timeouts
 
 ### ASPS toggle
 

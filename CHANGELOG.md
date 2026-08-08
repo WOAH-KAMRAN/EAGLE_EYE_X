@@ -4,6 +4,27 @@ All notable commits to the Eagle Eye X UAV Target Prioritization & Tracking Syst
 
 ---
 
+## 2026-08-08 — Repository restructure (team reproducibility)
+
+- **All legacy scripts archived (never deleted)**: every superseded tracking and
+  experimental script moved verbatim into `archive/` grouped by original location
+  (`archive/root/`, `archive/src/`, `archive/experimental/`). See `archive/README.md`
+  for the full lineage map.
+- **Depth experiments consolidated** under `experiments/depth/` (was `MDE/` + `mdecalib.py`).
+- **Production mainline** is now clearly `src/ASPS_LIDAR/` (`ASPS_LIDAR_TR.py` +
+  `prioritization.py`); `CALLING.MD` renamed to `AGENTS.md`.
+- **Removed junk**: `=1.71.0` (pip-log redirect), PostScript files in `src/`,
+  `eeprom.bin`/`mav.parm`/`mav.tlog*`, `terrain/`. Duplicate model weights deduped
+  into `models/`.
+- **Security**: `visdrone` (Ultralytics Hub helper) stripped of its API key and
+  archived.
+- **`.gitignore`/`.gitattributes`** rewritten for the new layout (model weights,
+  flight data, experiment outputs, local configs all stay untracked; LF line endings).
+- **Research tooling added**: `tools/analyze_flight.py`, `experiments/ablation/`,
+  `model/` toolkit, `configs/`, `Makefile`, `requirements*.txt`, `docs/`.
+
+---
+
 ## 2025-06-22
 
 - **`5ca887f`** — `Initial commit`

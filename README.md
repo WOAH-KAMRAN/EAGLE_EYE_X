@@ -1,66 +1,73 @@
 # Eagle Eye X
-A Target Prioritization & Tracking System for UAVs using NVIDIA JETSON ORIN NANO
-# Project Overview
 
-Eagle Eye X is a physical AI system designed for multirotor UAVs, integrating object detection, monocular depth estimation, and autonomous control into a single pipeline running on the NVIDIA Jetson Orin Nano.
+A Target Prioritization & Tracking System for UAVs using NVIDIA JETSON ORIN NANO.
 
-It allows UAVs to detect, prioritize, and track high-value targets in real time using a single RGB camera, a custom priority based system, and control algorithms.\
+Eagle Eye X is a physical AI system for multirotor UAVs: real-time object detection,
+custom **Adaptive Semantic Priority Selection (ASPS)**, Kalman-smoothed tracking, and
+autonomous control in a single pipeline running on a Jetson Orin Nano. It detects,
+prioritizes, and follows high-value targets with one RGB camera (plus optional TF Mini
+LiDAR distance following).
 
-# ⚠️ Research Notice
+## Quickstart
 
-This repository accompanies an ongoing research internship project, with a corresponding paper under review for publication.
-Certain resources, including trained AI models, datasets, and detailed flight logs, are not publicly included.
-This repo demonstrates system architecture, integration, and workflow without revealing proprietary research data.
-Full release will follow after the paper’s acceptance.
+```bash
+git clone git@github.com:WOAH-KAMRAN/EAGLE_EYE_X.git && cd EAGLE_EYE_X
+make setup                       # venv + deps (PC/SITL)
+make sitl                        # run against ArduPilot SITL (mock LiDAR)
+```
 
-**For collaboration or academic inquiries, please contact the maintainer directly.**
+See [docs/SETUP.md](docs/SETUP.md) for PC and Jetson setup, [docs/HARDWARE.md](docs/HARDWARE.md)
+for wiring, and [docs/MODEL_TESTING.md](docs/MODEL_TESTING.md) for training/evaluation.
 
+## Repository layout
 
-# System Overview
+```
+src/ASPS_LIDAR/          production mainline (tracking pipeline + ASPS + config loader)
+configs/                 YAML configuration (asps / control / hardware / logging)
+model/                   training, evaluation, inference, TensorRT export
+tools/analyze_flight.py  flight-log metrics + paper figures
+experiments/
+  ├── depth/             monocular-depth experiments (MiDaS / ZoeDepth) + calibration
+  └── ablation/          SITL ablation matrix runner
+failsafe/                Lua heartbeat + RTL failsafe for the flight controller
+docs/                    setup, hardware, architecture, model testing, research protocol
+archive/                 ALL legacy scripts, preserved verbatim (see archive/README.md)
+```
 
-Eagle Eye X consists of four main components and an additional telemetry module in development:
+## System overview
 
-**Description**
+| Component | Description |
+|---|---|
+| Core pipeline | `src/ASPS_LIDAR/ASPS_LIDAR_TR.py` — detection, ASPS prioritization, Kalman filtering, twin PID (yaw/pitch), distance PID, MAVSDK control, CSV + video logging |
+| ASPS | `prioritization.py` — `P_final = α·P_base + β·conf + γ·dist + δ·vel` with hysteresis |
+| Ground Control Station | custom monitoring interface (telemetry/video overlay, mission control) |
+| Failsafe | `failsafe/failsafe.lua` on the flight controller (heartbeat → RTL) |
+| Drone Bridge | ESP32 telemetry link — under development |
 
-**1. Core Python Script**: Runs on the Jetson Orin Nano; integrates object detection, MiDaS depth estimation, Kalman filter smoothing, twin PID loops, and MAVSDK based control  all in one script.
+**Core tech:** MiDaS monocular depth · ASPS target prioritization · Kalman smoothing ·
+twin PID loops · twin-dot target alignment · Lua failsafe · TensorRT YOLO.
 
-**2. Ground Control Station (GCS)**:	Custom interface for monitoring system health, telemetry, and video feed, with mission control capabilities.
+## Research
 
-**3. Lua Failsafe Script**:	Runs inside the flight controller to handle communication loss, emergency scenarios, or target loss.
+This repository accompanies an ongoing research internship; a paper is under review.
 
-**4. Drone Bridge (ESP32 Telemetry)**:	Under development; provides low-latency UAV to GCS telemetry link.
+- **Research notice:** trained models, datasets, and detailed flight logs are private
+  until paper acceptance. This repo demonstrates architecture, integration, and workflow.
+- **Methodology & metrics:** see [docs/RESEARCH.md](docs/RESEARCH.md) (ablation protocol,
+  metric definitions, figure recipes).
+- **Ablation harness:** `experiments/ablation/run_ablation.py` runs the ASPS vs
+  baseline matrix over SITL and produces comparison tables.
 
-**5. UAV  testbed**: integrating Jetson, camera, flight controller, and telemetry hardware 
+For collaboration or academic inquiries, contact the maintainers.
 
+## License
 
-# CORE TECH
-Single-camera depth estimation using MiDaS (monocular depth)
+MIT — see [LICENSE](LICENSE). Trained models/dataset remain private until publication.
 
-Custom target prioritization based on class hierarchy
-
-Kalman filter smoothing for stable tracking
-
-Twin PID control loops for yaw and pitch alignment
-
-Twin-dot target alignment system for visual confirmation
-
-Ground Control Station (GCS) with telemetry, video overlay, and control toggles
-
-Failsafe Lua script for emergency handling
-
-ESP32 Drone Bridge (under development) for telemetry communication
-
-
-# License
-
-Released under the MIT License.
-Some components (trained models/dataset) will remain private until paper publication.
-
-# Maintainers
+## Maintainers
 
 1. Kamran Ahmad [@WOAH-KAMRAN]
 2. Melvin Joseph [@AVATAR3905]
-4. Ayushya Ranjan [@AyushyaRanjan]
+3. Ayushya Ranjan [@AyushyaRanjan]
 
-# Mentor
-1. Dr. Sachin Gupta [@Sachinmait]
+**Mentor:** Dr. Sachin Gupta [@Sachinmait]

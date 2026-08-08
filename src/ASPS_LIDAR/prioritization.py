@@ -3,9 +3,12 @@
 # P_final = ALPHA*P_base + BETA*Conf + GAMMA*Distance + DELTA*Velocity
 
 import math
+import sys
 import time
 
-# --- Configuration ---
+from config import apply_overrides, parse_config_args
+
+# --- Configuration (defaults; override via configs/asps.yaml or --config) ---
 ALPHA = 0.60       # Base priority weight (mission hierarchy)
 BETA  = 0.20       # Confidence weight
 GAMMA = 0.15       # Distance weight
@@ -13,6 +16,9 @@ DELTA = 0.05       # Velocity weight
 
 SWITCH_THRESHOLD = 0.15   # Hysteresis: only switch targets when new > current + threshold
 USE_ASPS = True           # False = pure CLASS_PRIORITIES (ablation baseline)
+
+_config_path, _ = parse_config_args(sys.argv)
+apply_overrides(globals(), _config_path)
 
 
 class VelocityTracker:

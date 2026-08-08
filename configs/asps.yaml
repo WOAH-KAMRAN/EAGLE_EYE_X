@@ -1,0 +1,19 @@
+# ASPS — Adaptive Semantic Priority Selection.
+# P_final = ALPHA*P_base + BETA*Conf + GAMMA*Distance + DELTA*Velocity
+# Keep ALPHA + BETA + GAMMA + DELTA == 1.0 for a normalized score.
+
+ALPHA: 0.60        # base priority weight (mission hierarchy)
+BETA: 0.20         # confidence weight
+GAMMA: 0.15        # distance weight
+DELTA: 0.05        # velocity weight
+
+SWITCH_THRESHOLD: 0.15   # hysteresis: only switch when new > current + threshold
+USE_ASPS: True           # False = pure CLASS_PRIORITIES baseline (ablation)
+
+# Mission-defined class hierarchy: class_id -> base priority.
+# YOLO ids: 0=person, 1=bicycle, 2=car, 3=motorcycle.
+CLASS_PRIORITIES:
+  2: 4
+  1: 3
+  3: 2
+  0: 1

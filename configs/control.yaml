@@ -1,0 +1,45 @@
+# Control-loop configuration: PID gains, Kalman filters, limits, altitude hold.
+
+# Yaw / pitch / roll centering limits
+YAW_LIMIT: 30
+PITCH_LIMIT: 15
+ROLL_LIMIT: 15
+HOVER_THRUST: 0.5
+TAKEOFF_THRUST: 0.7
+DEAD_ZONE_YAW: 20
+DEAD_ZONE_PITCH: 20
+
+# Altitude control
+TARGET_ALTITUDE: 2.0
+ALTITUDE_TOLERANCE: 0.3
+MAX_ALTITUDE: 10.0
+MIN_ALTITUDE: 0.5
+
+# Centering PID (yaw + pitch + altitude)
+KP_YAW: 0.03
+KI_YAW: 0.001
+KD_YAW: 0.01
+KP_PITCH: 0.02
+KI_PITCH: 0.001
+KD_PITCH: 0.01
+KP_ALT: 0.5
+KI_ALT: 0.05
+KD_ALT: 0.1
+
+# Centering Kalman filters
+Q_KF: 0.1
+R_KF: 10
+KF_DT_DEFAULT: 0.033
+
+# Distance following (forward-velocity loop)
+TARGET_DISTANCE_M: 2.0
+DISTANCE_DEAD_ZONE_M: 0.15
+YAW_CENTERED_THRESHOLD: 30    # px: target "centered" when yaw err <= this
+MAX_FORWARD_SPEED_MPS: 2.0
+KP_DIST: 1.0
+KI_DIST: 0.05
+KD_DIST: 0.3
+
+# Distance Kalman filter
+Q_DIST_KF: 0.1
+R_DIST_KF: 3.0

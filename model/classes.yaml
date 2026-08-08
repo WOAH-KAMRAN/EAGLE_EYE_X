@@ -1,0 +1,7 @@
+# YOLO class mapping — single source of truth for Eagle Eye X.
+# Keep in sync with CLASS_PRIORITIES in configs/asps.yaml.
+names:
+  0: person
+  1: bicycle
+  2: car
+  3: motorcycle

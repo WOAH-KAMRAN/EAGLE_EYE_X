@@ -1,0 +1,32 @@
+# Eagle Eye X — PC / SITL development dependencies (x86 Linux)
+# Tested with Python 3.10. For Jetson Orin Nano use requirements-jetson.txt instead.
+#
+#   python -m venv --system-site-packages VENV/uav
+#   source VENV/uav/bin/activate
+#   pip install -r requirements.txt
+
+# --- ML / detection ---
+torch==2.9.1
+torchvision==0.24.1
+ultralytics==8.3.246
+
+# --- Drone control (MAVSDK) ---
+mavsdk==3.10.2
+
+# --- Vision / numeric ---
+opencv-python==4.12.0.88
+numpy==1.26.4
+matplotlib==3.10.8
+scipy==1.15.3
+Pillow>=10.0.0
+
+# --- Config / serialization ---
+PyYAML==6.0.3
+
+# --- Hardware / tooling ---
+pyserial>=3.5          # TF Mini LiDAR (optional; mock mode works without it)
+pandas>=2.0            # flight-log analysis (tools/analyze_flight.py)
+
+# --- Monocular depth (experiments/depth) ---
+# MiDaS / ZoeDepth require torch.hub downloads and are optional:
+#   pip install zoedepth   # for experiments/depth/zoe.py (follow its README)

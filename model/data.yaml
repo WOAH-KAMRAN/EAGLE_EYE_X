@@ -1,0 +1,24 @@
+# Ultralytics dataset template for Eagle Eye X.
+#
+# The training dataset is PRIVATE (research notice) and is NOT in the repo.
+# Keep your dataset at a path of your choice and point $EAGLE_DATASET at it:
+#
+#   export EAGLE_DATASET=/path/to/eagle_dataset
+#   python model/train.py --data model/data.yaml
+#
+# model/train.py substitutes ${EAGLE_DATASET} at runtime.
+#
+# Expected layout inside $EAGLE_DATASET:
+#   images/train/  images/val/  images/test/   (jpg/png)
+#   labels/train/  labels/val/  labels/test/   (YOLO .txt per image)
+
+path: ${EAGLE_DATASET}
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: person
+  1: bicycle
+  2: car
+  3: motorcycle

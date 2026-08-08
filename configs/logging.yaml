@@ -1,0 +1,13 @@
+# Logging / recording / safety timeouts.
+
+RECORD_VIDEO: True
+VIDEO_FOLDER: 'flights'
+
+TELEMETRY_TIMEOUT: 2.0
+DETECTION_TIMEOUT: 5.0
+TAKEOFF_TIMEOUT: 20.0
+
+EMERGENCY_STOP: False
+
+# 0 = run until stopped; >0 = self-land after N seconds (used by the ablation harness)
+RUN_DURATION_S: 0

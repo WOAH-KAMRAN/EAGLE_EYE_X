@@ -1,0 +1,25 @@
+# Hardware / connection / model configuration.
+# Keys mirror module-level constants in src/ASPS_LIDAR/*.py.
+# To override locally without touching the repo, copy this file to
+# configs/local/hardware.yaml and edit there (gitignored).
+
+# MAVSDK / SITL connection
+CONNECTION_STRING: 'udpin://127.0.0.1:14550'
+
+# YOLO model (path is relative to CWD when running the script)
+YOLO_MODEL_PATH: 'models/best.pt'
+CONF_THRESHOLD: 0.5
+IOU_THRESHOLD: 0.4
+
+# Camera
+CAMERA_WIDTH: 640
+CAMERA_HEIGHT: 480
+CAMERA_FPS: 30
+CAMERA_INDEX: 2
+
+# TF Mini LiDAR
+USE_REAL_LIDAR: False   # False = mock mode (works in SITL with no hardware)
+LIDAR_PORT: '/dev/ttyUSB0'
+LIDAR_BAUDRATE: 115200
+LIDAR_MIN_RANGE_M: 0.1
+LIDAR_MAX_RANGE_M: 12.0

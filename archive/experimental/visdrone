@@ -1,0 +1,7 @@
+from ultralytics import YOLO, checks, hub
+checks()
+
+hub.login("YOUR_API_KEY")  # SECRET REMOVED — rotate key
+
+model = YOLO('https://hub.ultralytics.com/models/uGFQFW8ngl9Fpug73iLl')
+results = model.train()

@@ -1,0 +1,29 @@
+# Eagle Eye X — Jetson Orin Nano (JetPack L4T) dependencies
+#
+# DO NOT use requirements.txt on the Jetson: the x86 CUDA wheels for torch do not
+# install on L4T. Install PyTorch from NVIDIA's JetPack wheel index, then the rest.
+# See docs/SETUP.md for the full step-by-step.
+#
+# Assumes JetPack 5.x / 6.x with JetPack-provided OpenCV (with GStreamer + CUDA),
+# CUDA, TensorRT, and cuDNN already installed.
+
+# --- PyTorch (JetPack wheel — pick the index for your JetPack version) ---
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/nv-jp6x
+#   (nv-jp5x for JetPack 5.x, nv-jp6x for JetPack 6.x)
+
+# --- Everything else ---
+mavsdk==3.10.2
+ultralytics==8.3.246
+numpy==1.26.4
+matplotlib==3.10.8
+scipy==1.15.3
+PyYAML==6.0.3
+pyserial>=3.5
+
+# --- TensorRT inference ---
+# tensorrt and pycuda come from the JetPack SDK (not PyPI) on the Orin:
+#   sudo apt install python3-libnvinfer python3-libnvinfer-dev  # TensorRT python bindings
+#   pip install 'pycuda>=2022.2'
+
+# --- Monocular depth (optional) ---
+#   pip install zoedepth   # for experiments/depth/zoe.py (follow its README)

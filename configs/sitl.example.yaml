@@ -1,0 +1,14 @@
+# SITL / mock-harness configuration for team development.
+# No real hardware required: mock LiDAR, simulator connection, USB webcam.
+# Run with:  python src/ASPS_LIDAR/ASPS_LIDAR_TR.py --config configs/sitl.example.yaml
+#
+# Copy to configs/local/sitl.yaml (gitignored) to keep personal tweaks out of the repo.
+
+CONNECTION_STRING: 'udpin://127.0.0.1:14550'
+YOLO_MODEL_PATH: 'models/yolov8n.pt'
+
+USE_REAL_LIDAR: False
+CAMERA_INDEX: 2
+
+RECORD_VIDEO: True
+VIDEO_FOLDER: 'flights'

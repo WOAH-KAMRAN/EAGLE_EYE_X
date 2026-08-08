@@ -24,7 +24,13 @@ This folder contains an Adaptive Semantic Priority Selection (ASPS) implementati
 ## Common Tasks
 
 ### Tune ASPS weights
-Edit `prioritization.py` top section. Ensure `ALPHA + BETA + GAMMA + DELTA = 1.0`.
+Edit `configs/asps.yaml` (preferred) or the top section of `prioritization.py`.
+Ensure `ALPHA + BETA + GAMMA + DELTA = 1.0`.
+
+### Tune control / hardware / logging
+Edit `configs/control.yaml`, `configs/hardware.yaml`, `configs/logging.yaml`, or drop
+personal overrides into `configs/local/` (gitignored). Values are applied at startup
+by `src/ASPS_LIDAR/config.py` (`apply_overrides`).
 
 ### Add a new priority component
 1. Add weight constant in `prioritization.py`

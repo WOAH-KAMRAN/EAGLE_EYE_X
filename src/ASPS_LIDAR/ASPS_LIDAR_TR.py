@@ -25,6 +25,7 @@ import signal
 import sys
 import random
 
+from config import apply_overrides, parse_config_args
 from prioritization import ASPSPrioritySelector, USE_ASPS
 
 # PyTorch and YOLO imports
@@ -49,7 +50,7 @@ except ImportError:
 # --- Configuration ---
 CONNECTION_STRING = 'udpin://127.0.0.1:14550'
 
-YOLO_MODEL_PATH = 'yolov8n.pt'
+YOLO_MODEL_PATH = 'models/best.pt'
 
 CONF_THRESHOLD = 0.5
 IOU_THRESHOLD = 0.4
@@ -126,6 +127,11 @@ DETECTION_TIMEOUT = 5.0
 TAKEOFF_TIMEOUT = 20.0
 
 EMERGENCY_STOP = False
+RUN_DURATION_S = 0          # 0 = run until stopped; >0 = self-land after N seconds (ablation)
+
+# Layer YAML configuration (configs/*.yaml, configs/local/*.yaml, or --config path)
+_config_path, _ = parse_config_args(sys.argv)
+apply_overrides(globals(), _config_path)
 
 display_queue = queue.Queue(maxsize=2)
 display_should_stop = threading.Event()
@@ -575,6 +581,7 @@ async def tracking_loop():
     log_writer = csv.writer(log_file)
     log_writer.writerow([
         'Time', 'Mode', 'Alt', 'Alt_Err',
+        'Yaw_Err', 'Pitch_Err',
         'Yaw_Cmd', 'Pitch_Cmd', 'Raw_LiDAR_m', 'KF_Dist_m',
         'Dist_Err_m', 'Fwd_Vel_mps', 'Target_Centered',
         'Class', 'Conf', 'RC_OK', 'KF_dt',
@@ -600,6 +607,7 @@ async def tracking_loop():
     last_detection_time = time.time()
     frame_count = 0
     last_frame_time = time.time()
+    run_start = time.time()
 
     # ASPS component breakdown for logging
     comp_base = comp_conf = comp_dist = comp_vel = 0.0
@@ -607,6 +615,9 @@ async def tracking_loop():
 
     try:
         while not EMERGENCY_STOP:
+            if RUN_DURATION_S and (time.time() - run_start) > RUN_DURATION_S:
+                print(f"Run duration limit {RUN_DURATION_S}s reached — landing")
+                break
             frame_count += 1
 
             # Per-frame dt
@@ -650,6 +661,7 @@ async def tracking_loop():
                 break
 
             yaw_cmd = pitch_cmd = 0.0
+            yaw_err = pitch_err = 0.0
             forward_velocity = 0.0
             tracked_class = -1
             confidence = 0.0
@@ -774,6 +786,7 @@ async def tracking_loop():
                 else:
                     if time.time() - last_detection_time > DETECTION_TIMEOUT:
                         yaw_cmd = pitch_cmd = 0.0
+                        yaw_err = pitch_err = 0.0
                         forward_velocity = 0.0
                         yaw_pid.reset()
                         pitch_pid.reset()
@@ -880,6 +893,7 @@ async def tracking_loop():
             log_writer.writerow([
                 time.time(), mode.name, altitude,
                 TARGET_ALTITUDE - altitude,
+                yaw_err, pitch_err,
                 yaw_cmd, pitch_cmd,
                 raw_lidar_m, kf_dist_m, dist_err_m, forward_velocity,
                 int(target_centered),
