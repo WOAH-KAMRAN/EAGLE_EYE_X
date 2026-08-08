@@ -29,6 +29,13 @@ def main():
     ap.add_argument("--save", action="store_true", help="save annotated outputs")
     args = ap.parse_args()
 
+    if not os.path.exists(args.model) and (os.sep in args.model or "." in os.path.basename(args.model)):
+        raise SystemExit(
+            f"Model not found: {args.model}\n"
+            "  Run 'make models' to fetch the dev base model (yolov8n.pt), or obtain the\n"
+            "  private custom weights (best.pt) from a maintainer and drop them into models/."
+        )
+
     model = YOLO(args.model)
     os.makedirs(args.outdir, exist_ok=True)
 

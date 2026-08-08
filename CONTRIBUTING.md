@@ -25,6 +25,15 @@ simple, keep it reproducible.
 - Personal machine settings go in `configs/local/` (gitignored), never in `configs/`.
 - Model weights, flight logs, and datasets stay out of git (see `.gitignore`).
 - New class ids must be mirrored in `model/classes.yaml` and `configs/asps.yaml`.
+- Always run scripts **from the repo root** — model/video paths are CWD-relative.
+
+## Onboarding a teammate
+
+```bash
+git clone git@github.com:WOAH-KAMRAN/EAGLE_EYE_X.git && cd EAGLE_EYE_X
+make setup && make models     # venv + dev weights (best.pt stays private)
+# then hand them RUN.md
+```
 
 ## Validation (before pushing)
 

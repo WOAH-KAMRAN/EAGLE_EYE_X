@@ -77,3 +77,10 @@ def apply_overrides(namespace, config_path=None):
         if isinstance(key, str) and key.isupper():
             namespace[key] = value
     return cfg
+
+
+def print_resolved(cfg):
+    """Print the fully-resolved effective configuration (for startup debugging)."""
+    print("Resolved configuration:")
+    for key in sorted(cfg):
+        print(f"  {key} = {cfg[key]}")

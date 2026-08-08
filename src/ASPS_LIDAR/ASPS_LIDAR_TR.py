@@ -131,7 +131,19 @@ RUN_DURATION_S = 0          # 0 = run until stopped; >0 = self-land after N seco
 
 # Layer YAML configuration (configs/*.yaml, configs/local/*.yaml, or --config path)
 _config_path, _ = parse_config_args(sys.argv)
-apply_overrides(globals(), _config_path)
+_effective_cfg = apply_overrides(globals(), _config_path)
+
+print("Eagle Eye X — resolved settings")
+print(f"  model      : {YOLO_MODEL_PATH}")
+print(f"  connection : {CONNECTION_STRING}")
+print(f"  ASPS       : {'ON' if USE_ASPS else 'OFF (baseline)'}  "
+      f"(a={ALPHA:.2f} b={BETA:.2f} g={GAMMA:.2f} d={DELTA:.2f})")
+print(f"  LiDAR      : {'real' if USE_REAL_LIDAR else 'mock'}")
+print(f"  camera     : index {CAMERA_INDEX} ({CAMERA_WIDTH}x{CAMERA_HEIGHT}@{CAMERA_FPS})")
+print(f"  video/logs : {VIDEO_FOLDER}")
+if '--verbose' in sys.argv:
+    for _k in sorted(_effective_cfg):
+        print(f"    {_k} = {_effective_cfg[_k]}")
 
 display_queue = queue.Queue(maxsize=2)
 display_should_stop = threading.Event()

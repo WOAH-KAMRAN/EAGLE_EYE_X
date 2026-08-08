@@ -6,12 +6,13 @@ PY    := $(VENV)/bin/python
 PIP   := $(VENV)/bin/pip
 DATA  ?= dataset            # dataset root passed to model/*.py (override with DATA=...)
 
-.PHONY: help setup setup-jetson sitl train eval predict trt analyze ablation clean
+.PHONY: help setup setup-jetson models sitl train eval predict trt analyze ablation clean
 
 help:
 	@echo "Eagle Eye X targets:"
 	@echo "  make setup           create venv + install requirements.txt (PC/SITL)"
 	@echo "  make setup-jetson    print Jetson JetPack install steps"
+	@echo "  make models          fetch dev YOLO weights into models/ (best.pt stays private)"
 	@echo "  make sitl            run tracking against SITL (mock LiDAR, no hardware)"
 	@echo "  make train           train YOLO (DATA=/path/to/dataset)"
 	@echo "  make eval            evaluate a trained model (DATA=/path/to/dataset)"
@@ -28,6 +29,20 @@ setup:
 
 setup-jetson:
 	@echo "Jetson setup is interactive — follow docs/SETUP.md (requires JetPack SDK)."
+
+models:
+	@mkdir -p models
+	@if [ -f models/yolov8n.pt ]; then \
+		echo "models/yolov8n.pt already present."; \
+	else \
+		echo "Fetching base YOLO dev weights (yolov8n.pt)..."; \
+		$(PY) -c "from ultralytics import YOLO; YOLO('yolov8n.pt'); print('downloaded')"; \
+		mv -f yolov8n.pt models/yolov8n.pt; \
+	fi
+	@echo ""
+	@echo "Done. models/yolov8n.pt ready for SITL / development."
+	@echo "NOTE: best.pt (custom 4-class model, private until paper) is NOT in the repo."
+	@echo "      Obtain it from a maintainer and drop it into models/best.pt."
 
 sitl:
 	@echo "Connecting to SITL at udpin://127.0.0.1:14550 (mock LiDAR)."

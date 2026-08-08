@@ -25,7 +25,21 @@ pip install -r requirements.txt
 
 # or, one command:
 make setup
+
+# 3. fetch development model weights into models/
+make models
 ```
+
+> **Important:** always run the tracking/model scripts **from the repo root**. Paths
+> like `models/best.pt` and `flights/` are resolved relative to the current directory.
+
+### Model weights
+
+| Weight | Purpose | How to get |
+|---|---|---|
+| `models/yolov8n.pt` | SITL/dev base model (COCO, auto-usable for the 4 priority classes) | `make models` (auto-download) |
+| `models/best.pt` | Custom 4-class model — **private until paper publication** | Request from a maintainer, drop into `models/` |
+| `models/best.engine` | TensorRT engine for Jetson | `python model/export_trt.py --model models/best.pt --half` |
 
 Verify:
 
