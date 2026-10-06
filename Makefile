@@ -6,7 +6,7 @@ PY    := $(VENV)/bin/python
 PIP   := $(VENV)/bin/pip
 DATA  ?= dataset            # dataset root passed to model/*.py (override with DATA=...)
 
-.PHONY: help setup setup-jetson models sitl train eval predict trt analyze ablation clean
+.PHONY: help setup setup-jetson models sitl train eval predict trt analyze ablation replay clean
 
 help:
 	@echo "Eagle Eye X targets:"
@@ -20,6 +20,7 @@ help:
 	@echo "  make trt             export .pt -> TensorRT .engine"
 	@echo "  make analyze         compute metrics/plots from a flight CSV (F=<log.csv>)"
 	@echo "  make ablation        run the SITL ablation matrix"
+	@echo "  make replay          offline ASPS vs baseline replay on a video (V=<clip> [GT=<gt.csv>])"
 	@echo "  make clean           remove __pycache__ and egg-info"
 
 setup:
@@ -69,3 +70,6 @@ ablation:
 clean:
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +
 	find . -name '*.egg-info' -type d -prune -exec rm -rf {} +
+
+replay:
+	$(PY) experiments/replay/replay_asps.py --source $(V) $(if $(GT),--gt $(GT),)

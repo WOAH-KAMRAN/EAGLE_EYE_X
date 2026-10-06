@@ -28,6 +28,7 @@ terrain/
 
 # Ablation / experiment outputs
 /experiments/results/
+/experiments/replay/results/
 model/runs/
 model/dataset/
 /paper/
